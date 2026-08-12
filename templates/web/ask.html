@@ -1,0 +1,61 @@
+{% extends "web/base.html" %}
+{% block nav_ask %}on{% endblock %}
+{% block title %}Ask — Team Knowledge Base{% endblock %}
+
+{% block content %}
+  <p class="sub">Answers are built by following the relationships between stored
+  entities. Every answer shows the connections it used.</p>
+
+  <form class="ask" method="get" action="{% url 'ask' %}">
+    <input type="text" name="q" value="{{ question }}" placeholder="Ask about a project, person, client or decision..." autofocus>
+    <button type="submit">Ask</button>
+  </form>
+
+  {% if not result %}
+    <div class="examples">
+      <p>Try one of these:</p>
+      {% for example in examples %}
+        <a href="{% url 'ask' %}?q={{ example|urlencode }}">{{ example }}</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if result %}
+    <h2>Answer</h2>
+    <div class="panel answer">{{ result.answer }}</div>
+    <p class="sub">
+      <span class="tag">{{ result.generated_by }}</span>
+      <span class="tag">entry: {{ result.entry_method }}</span>
+      <span class="tag">{{ result.evidence|length }} connected entities</span>
+    </p>
+
+    {% if result.entry_points %}
+      <h2>Starting points</h2>
+      <ul class="plain">
+        {% for point in result.entry_points %}
+          <li>
+            <span class="tag">{{ point.type }}</span>
+            <a href="{% url 'entity' point.type point.id %}">{{ point.label }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <h2>Connections used</h2>
+    {% if result.evidence %}
+      <ul class="plain">
+        {% for item in result.evidence %}
+          {% if item.hops > 0 %}
+            <li>
+              <span class="tag">{{ item.type }}</span>
+              <a href="{% url 'entity' item.type item.id %}">{{ item.label }}</a>
+              <div class="path">{{ item.path }}</div>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">Nothing in the knowledge base matched this question.</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}

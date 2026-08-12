@@ -1,0 +1,52 @@
+{% extends "web/base.html" %}
+{% block title %}{{ label }} — Team Knowledge Base{% endblock %}
+
+{% block content %}
+  <p class="sub"><span class="tag">{{ entity_type }}</span></p>
+  <h1 style="margin-top:6px">{{ label }}</h1>
+
+  <h2>Details</h2>
+  <div class="panel">
+    <table>
+      {% for key, value in entity.summary_rows %}
+        <tr><td class="k">{{ key }}</td><td>{{ value }}</td></tr>
+      {% empty %}
+        <tr><td class="empty">No further details recorded.</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <h2>Directly connected</h2>
+  {% if direct %}
+    <ul class="plain">
+      {% for item in direct %}
+        <li>
+          <span class="tag">{{ item.type }}</span>
+          <a href="{% url 'entity' item.type item.id %}">{{ item.label }}</a>
+          <div class="path">{{ item.path }}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Nothing connects to this yet.</p>
+  {% endif %}
+
+  {% if indirect %}
+    <h2>Reached through other entities</h2>
+    <ul class="plain">
+      {% for item in indirect %}
+        <li>
+          <span class="tag">{{ item.type }}</span>
+          <a href="{% url 'entity' item.type item.id %}">{{ item.label }}</a>
+          <div class="path">{{ item.path }}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <p class="sub" style="margin-top:24px">
+    <a href="/api/related/?type={{ entity_type }}&amp;id={{ entity.pk }}&amp;hops={{ hops }}">
+      Same data as JSON
+    </a>
+  </p>
+{% endblock %}

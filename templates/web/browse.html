@@ -1,0 +1,23 @@
+{% extends "web/base.html" %}
+{% block nav_browse %}on{% endblock %}
+{% block title %}Browse — Team Knowledge Base{% endblock %}
+
+{% block content %}
+  <p class="sub">Everything stored in the knowledge base. Open any entity to see
+  what it connects to.</p>
+
+  <div class="cols">
+    {% for title, type_name, items in groups %}
+      <div>
+        <h2>{{ title }} ({{ items|length }})</h2>
+        <ul class="plain">
+          {% for item in items %}
+            <li><a href="{% url 'entity' type_name item.pk %}">{{ item }}</a></li>
+          {% empty %}
+            <li class="empty">None yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
