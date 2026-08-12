@@ -58,12 +58,14 @@ class Person(TimestampedModel):
         return self.name
 
     def summary_rows(self):
-        return _rows([
-            ("Role", self.role),
-            ("Email", self.email),
-            ("Skills", ", ".join(self.skills or [])),
-            ("Joined", self.joined),
-        ])
+        return _rows(
+            [
+                ("Role", self.role),
+                ("Email", self.email),
+                ("Skills", ", ".join(self.skills or [])),
+                ("Joined", self.joined),
+            ]
+        )
 
 
 class Client(TimestampedModel):
@@ -83,13 +85,15 @@ class Client(TimestampedModel):
         return self.name
 
     def summary_rows(self):
-        return _rows([
-            ("Industry", self.industry),
-            ("Size", self.size),
-            ("Primary contact", self.primary_contact),
-            ("Status", self.status),
-            ("Notes", self.notes),
-        ])
+        return _rows(
+            [
+                ("Industry", self.industry),
+                ("Size", self.size),
+                ("Primary contact", self.primary_contact),
+                ("Status", self.status),
+                ("Notes", self.notes),
+            ]
+        )
 
 
 class Topic(TimestampedModel):
@@ -116,17 +120,27 @@ class Project(TimestampedModel):
 
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="Discovery")
+    status = models.CharField(
+        max_length=50, choices=STATUS_CHOICES, default="Discovery"
+    )
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
 
     # Internal projects have no client, so this is nullable on purpose.
     client = models.ForeignKey(
-        Client, null=True, blank=True, on_delete=models.SET_NULL, related_name="projects"
+        Client,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="projects",
     )
     # Losing the lead should never silently delete project history.
     lead = models.ForeignKey(
-        Person, null=True, blank=True, on_delete=models.SET_NULL, related_name="led_projects"
+        Person,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="led_projects",
     )
     team = models.ManyToManyField(Person, blank=True, related_name="projects")
     topics = models.ManyToManyField(Topic, blank=True, related_name="projects")
@@ -138,16 +152,18 @@ class Project(TimestampedModel):
         return self.name
 
     def summary_rows(self):
-        return _rows([
-            ("Status", self.status),
-            ("Client", self.client),
-            ("Lead", self.lead),
-            ("Team", ", ".join(p.name for p in self.team.all())),
-            ("Topics", ", ".join(t.name for t in self.topics.all())),
-            ("Started", self.start_date),
-            ("Ended", self.end_date),
-            ("Description", self.description),
-        ])
+        return _rows(
+            [
+                ("Status", self.status),
+                ("Client", self.client),
+                ("Lead", self.lead),
+                ("Team", ", ".join(p.name for p in self.team.all())),
+                ("Topics", ", ".join(t.name for t in self.topics.all())),
+                ("Started", self.start_date),
+                ("Ended", self.end_date),
+                ("Description", self.description),
+            ]
+        )
 
 
 class Decision(TimestampedModel):
@@ -157,12 +173,22 @@ class Decision(TimestampedModel):
 
     # Company-wide decisions are not attached to any project.
     project = models.ForeignKey(
-        Project, null=True, blank=True, on_delete=models.SET_NULL, related_name="decisions"
+        Project,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="decisions",
     )
     made_by = models.ForeignKey(
-        Person, null=True, blank=True, on_delete=models.SET_NULL, related_name="decisions_made"
+        Person,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="decisions_made",
     )
-    participants = models.ManyToManyField(Person, blank=True, related_name="decisions_involved_in")
+    participants = models.ManyToManyField(
+        Person, blank=True, related_name="decisions_involved_in"
+    )
     topics = models.ManyToManyField(Topic, blank=True, related_name="decisions")
 
     class Meta:
@@ -172,14 +198,16 @@ class Decision(TimestampedModel):
         return self.title
 
     def summary_rows(self):
-        return _rows([
-            ("Date", self.date),
-            ("Made by", self.made_by),
-            ("Project", self.project),
-            ("Participants", ", ".join(p.name for p in self.participants.all())),
-            ("Topics", ", ".join(t.name for t in self.topics.all())),
-            ("Summary", self.summary),
-        ])
+        return _rows(
+            [
+                ("Date", self.date),
+                ("Made by", self.made_by),
+                ("Project", self.project),
+                ("Participants", ", ".join(p.name for p in self.participants.all())),
+                ("Topics", ", ".join(t.name for t in self.topics.all())),
+                ("Summary", self.summary),
+            ]
+        )
 
 
 class Document(TimestampedModel):
@@ -193,12 +221,14 @@ class Document(TimestampedModel):
     title = models.CharField(max_length=300)
     content = models.TextField(blank=True)
     source = models.CharField(max_length=50, choices=SOURCE_CHOICES, default="manual")
-    # Stable identifier from the origin system; lets re-ingestion update rather
-    # than duplicate. Unique only when set, hence null=True over blank default.
     external_ref = models.CharField(max_length=500, null=True, blank=True, unique=True)
     date = models.DateField(null=True, blank=True)
     author = models.ForeignKey(
-        Person, null=True, blank=True, on_delete=models.SET_NULL, related_name="documents"
+        Person,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="documents",
     )
 
     class Meta:
@@ -208,13 +238,15 @@ class Document(TimestampedModel):
         return self.title
 
     def summary_rows(self):
-        return _rows([
-            ("Source", self.get_source_display()),
-            ("Date", self.date),
-            ("Author", self.author),
-            ("Reference", self.external_ref),
-            ("Content", self.content),
-        ])
+        return _rows(
+            [
+                ("Source", self.get_source_display()),
+                ("Date", self.date),
+                ("Author", self.author),
+                ("Reference", self.external_ref),
+                ("Content", self.content),
+            ]
+        )
 
 
 class Link(TimestampedModel):
@@ -262,7 +294,13 @@ class Link(TimestampedModel):
         ]
         constraints = [
             models.UniqueConstraint(
-                fields=["source_type", "source_id", "target_type", "target_id", "rel_type"],
+                fields=[
+                    "source_type",
+                    "source_id",
+                    "target_type",
+                    "target_id",
+                    "rel_type",
+                ],
                 name="unique_link",
             )
         ]

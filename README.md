@@ -48,6 +48,10 @@ cp .env.example .env
 # then set GEMINI_API_KEY=...
 ```
 
+Defaults to `gemini-3.6-flash` via the Interactions API. Gemini 2.5 models are
+retired for new API keys, so an older model name will 404 — the system logs a
+warning and falls back to the template answer rather than failing the request.
+
 ---
 
 ## Try it

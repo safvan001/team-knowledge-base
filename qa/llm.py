@@ -34,6 +34,12 @@ def _get_client():
 def _generate(prompt):
     """One call. Returns text, or None if unavailable or failing.
 
+    Uses the Interactions API, which is what Google recommends for new
+    development. `store=False` keeps it stateless: each call is independent,
+    and the team's internal knowledge is not retained server-side between
+    requests. Both matter here - there is no conversation to carry forward,
+    and the context being sent is the company's own information.
+
     Answer generation is a convenience over retrieval, not the source of
     truth, so a provider failure degrades the response rather than breaking
     the request.
@@ -41,12 +47,12 @@ def _generate(prompt):
     if not llm_available():
         return None
     try:
-        response = _get_client().models.generate_content(
-            model=settings.GEMINI_MODEL, contents=prompt
+        interaction = _get_client().interactions.create(
+            model=settings.GEMINI_MODEL, input=prompt, store=False
         )
-        return (response.text or "").strip()
+        return (interaction.output_text or "").strip()
     except Exception as exc:
-        logger.warning("Gemini call failed, falling back: %s", exc)
+        logger.warning("Gemini call failed, falling back to template: %s", exc)
         return None
 
 

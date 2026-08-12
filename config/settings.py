@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
 # template over the same retrieved context. See qa/answers.py.
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 
 # How far the retrieval layer walks out from the entities a question names.
 RETRIEVAL_MAX_HOPS = int(os.environ.get("RETRIEVAL_MAX_HOPS", "2"))
