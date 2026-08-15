@@ -215,7 +215,6 @@ class Document(TimestampedModel):
         ("markdown", "Markdown file"),
         ("slack", "Slack message"),
         ("manual", "Entered manually"),
-        ("google-docs", "Google Docs"),
     ]
 
     title = models.CharField(max_length=300)
