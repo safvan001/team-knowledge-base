@@ -186,6 +186,30 @@ class TestBadInput:
 
         assert response.status_code == 400
 
+    def test_several_documents_can_omit_the_external_reference(self, small_kb, auth_client):
+        """Blank must store as NULL, not "". A unique constraint allows many
+        NULLs but only one empty string, so storing "" would make the second
+        manually created document fail with a 500."""
+        for title in ("First note", "Second note"):
+            response = auth_client.post(
+                "/api/documents/",
+                {"title": title, "content": "Nothing linked here.", "external_ref": ""},
+                format="json",
+            )
+            assert response.status_code == 201, response.data
+
+        assert Document.objects.filter(external_ref__isnull=True).count() == 2
+
+    def test_a_duplicate_external_reference_is_still_rejected(self, small_kb, auth_client):
+        """Allowing blanks must not weaken the constraint where it matters."""
+        payload = {"title": "A", "content": "x", "external_ref": "file:same.md"}
+        assert auth_client.post("/api/documents/", payload, format="json").status_code == 201
+
+        response = auth_client.post(
+            "/api/documents/", dict(payload, title="B"), format="json"
+        )
+        assert response.status_code == 400
+
     def test_related_endpoint_rejects_an_unknown_type(self, sample_kb, anon_client):
         assert anon_client.get("/api/related/?type=unicorn&id=1").status_code == 400
 

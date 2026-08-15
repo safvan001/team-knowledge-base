@@ -134,6 +134,17 @@ class DocumentSerializer(serializers.ModelSerializer):
             "author", "author_detail", "mentions",
         ]
 
+    def validate_external_ref(self, value):
+        """Store an omitted reference as NULL, never as an empty string.
+
+        The field is unique because it identifies a document in its source
+        system. A blank one means "not imported from anywhere", and several
+        documents can be in that state - but a unique constraint permits many
+        NULLs and only one empty string, so leaving the field blank in a form
+        would fail on the second document.
+        """
+        return value or None
+
     def get_mentions(self, obj):
         """Entities this document was auto-linked to, grouped by type."""
         from .linking import outgoing_links
